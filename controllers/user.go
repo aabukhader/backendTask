@@ -27,7 +27,7 @@ func login(username string, password string) models.User {
 
 }
 
-// Authenticate : check the user credentials
+// Authenticate : check the user credentials and generat the token
 func Authenticate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	var credentials models.Authentication
@@ -42,14 +42,15 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 	res := login(credentials.Username, credentials.Password)
 	if res.ID != 0 {
-		w.WriteHeader(http.StatusOK)
 		token, err := helper.GetToken(credentials.Username, credentials.Password)
 		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			var res models.StatusRes
 			res.Status = 500
 			res.Msg = "Error generating JWT token"
 			json.NewEncoder(w).Encode(res)
 		} else {
+			w.WriteHeader(http.StatusOK)
 			w.Header().Set("Authorization", "Bearer "+token)
 			var res models.UserStatusResSuccss
 			res.Status = 200
@@ -68,8 +69,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 // Registration : create new user
-func Registration(w http.ResponseWriter, r *http.Request){
+func Registration(w http.ResponseWriter, r *http.Request) {
 
 }
