@@ -15,7 +15,7 @@ func routes() *mux.Router {
 		w.Write([]byte("<h1 style='text-align:center'>Backend task </h1>"))
 	})
 	Router.HandleFunc("/api/user/Login", controllers.Authenticate).Methods("POST")
-	// Router.HandleFunc("/api/user/SignUp", Login).Methods("POST")
+	Router.HandleFunc("/api/user/signUp", controllers.Registration).Methods("POST")
 	return Router
 }
 

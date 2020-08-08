@@ -1,5 +1,6 @@
 package controllers
 
+// @to-do : add bcrypt to Registration
 import (
 	"database/sql"
 	"encoding/json"
@@ -69,7 +70,67 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getUserByID(id int64) models.User {
+	var user = models.User{}
+	conn.QueryRow("SELECT * FROM users where id=?", id).
+		Scan(
+			&user.ID,
+			&user.Username,
+			&user.FirstName,
+			&user.LastName,
+			&user.Password,
+			&user.Email,
+		)
+	return user
+}
+
+func createUser(user models.User) models.User {
+	stmt, _ := conn.Prepare("INSERT INTO users SET username=?, password=?, firstname=?, lastname=?, email=?")
+	res, _ := stmt.Exec(user.FirstName, user.Password, user.FirstName, user.LastName, user.Email)
+	id, _ := res.LastInsertId()
+	return getUserByID(id)
+}
+
 // Registration : create new user
 func Registration(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+	var user models.User
+	json.NewDecoder(r.Body).Decode(&user)
+	if len(user.Username) == 0 || len(user.Password) == 0 || len(user.FirstName) == 0 || len(user.LastName) == 0 || len(user.Email) == 0 {
+		var res models.StatusRes
+		res.Status = 400
+		res.Msg = "All Fields are Required"
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 
+	stmt, err := conn.Prepare("INSERT INTO users SET username=?, password=?, firstname=?, lastname=?, email=?")
+	if err == nil {
+		_, err := stmt.Exec(&user.FirstName, &user.Password, &user.FirstName, &user.LastName, &user.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			var res models.StatusRes
+			res.Status = 500
+			res.Msg = "Something went wrong"
+			json.NewEncoder(w).Encode(res)
+
+		} else {
+			w.WriteHeader(http.StatusOK)
+			token, err := helper.GetToken(user.Username, user.Password)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				var res models.StatusRes
+				res.Status = 500
+				res.Msg = "Error generating JWT token"
+				json.NewEncoder(w).Encode(res)
+			}
+			var res models.UserStatusResSuccss
+			res.Status = 200
+			res.Msg = "User has been created successfully"
+			res.Data = createUser(user)
+			res.Data.Token = token
+			json.NewEncoder(w).Encode(res)
+		}
+	}
 }
