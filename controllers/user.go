@@ -43,7 +43,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	res := login(credentials.Username, credentials.Password)
 	if res.ID != 0 {
 		w.WriteHeader(http.StatusOK)
-		token, err := helper.GetToken(credentials.Username)
+		token, err := helper.GetToken(credentials.Username, credentials.Password)
 		if err != nil {
 			var res models.StatusRes
 			res.Status = 500
@@ -66,4 +66,10 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 		res.Data[0] = ""
 		json.NewEncoder(w).Encode(res)
 	}
+}
+
+
+// Registration : create new user
+func Registration(w http.ResponseWriter, r *http.Request){
+
 }
