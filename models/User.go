@@ -8,7 +8,13 @@ type User struct {
 	LastName  string `json:"lastname"`
 	Password  string `json:"password"`
 	Email     string `json:"email"`
-	Token     string `json:"token"`
+	Token     *Token `json:"token"`
+}
+
+// Token Struct
+type Token struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // Authentication Struct

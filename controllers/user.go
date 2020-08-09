@@ -52,7 +52,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(res)
 		} else {
 			w.WriteHeader(http.StatusOK)
-			w.Header().Set("Authorization", "Bearer "+token)
+			w.Header().Set("Authorization", "Bearer "+token.AccessToken)
 			var res models.UserStatusResSuccss
 			res.Status = 200
 			res.Msg = "LogedIn successfully"
