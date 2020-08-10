@@ -81,6 +81,7 @@ func getUserByID(id int64) models.User {
 			&user.Password,
 			&user.Email,
 		)
+	defer conn.Close()
 	return user
 }
 
@@ -88,6 +89,7 @@ func createUser(user models.User) models.User {
 	stmt, _ := conn.Prepare("INSERT INTO users SET username=?, password=?, firstname=?, lastname=?, email=?")
 	res, _ := stmt.Exec(user.FirstName, user.Password, user.FirstName, user.LastName, user.Email)
 	id, _ := res.LastInsertId()
+	defer stmt.Close()
 	return getUserByID(id)
 }
 
@@ -113,6 +115,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 			var res models.StatusRes
 			res.Status = 500
 			res.Msg = "Something went wrong"
+			defer stmt.Close()
 			json.NewEncoder(w).Encode(res)
 
 		} else {
@@ -123,6 +126,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 				var res models.StatusRes
 				res.Status = 500
 				res.Msg = "Error generating JWT token"
+				defer stmt.Close()
 				json.NewEncoder(w).Encode(res)
 			}
 			var res models.UserStatusResSuccss
@@ -130,6 +134,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 			res.Msg = "User has been created successfully"
 			res.Data = createUser(user)
 			res.Data.Token = token
+			defer stmt.Close()
 			json.NewEncoder(w).Encode(res)
 		}
 	}

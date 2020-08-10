@@ -19,3 +19,10 @@ type StatusRes struct {
 	Status int    `json:"status"`
 	Msg    string `json:"msg"`
 }
+
+// PostItemResSuccss Struct
+type PostItemResSuccss struct {
+	Status int        `json:"status"`
+	Msg    string     `json:"msg"`
+	Data   []*PostItem `json:"data"`
+}

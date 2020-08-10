@@ -16,6 +16,7 @@ func routes() *mux.Router {
 	})
 	Router.HandleFunc("/api/user/Login", controllers.Authenticate).Methods("POST")
 	Router.HandleFunc("/api/user/signUp", controllers.Registration).Methods("POST")
+	Router.HandleFunc("/api/search/{query}", controllers.Search).Methods("GET")
 	return Router
 }
 
