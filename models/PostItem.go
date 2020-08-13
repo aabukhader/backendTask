@@ -16,6 +16,7 @@ type Data struct {
 
 // PostItem Struct
 type PostItem struct {
+	ID                    int               `json:"id"`
 	Name                  string            `json:"name"`
 	Type                  string            `json:"type"`
 	URL                   string            `json:"url"`
@@ -40,5 +41,4 @@ type PostItem struct {
 	Contacts              map[string]string `json:"contacts"`
 	Authors               map[string]string `json:"authers"`
 }
-
 

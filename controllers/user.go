@@ -85,12 +85,12 @@ func getUserByID(id int64) models.User {
 	return user
 }
 
-func createUser(user models.User) models.User {
+func createUser(user models.User) (models.User, error) {
 	stmt, _ := conn.Prepare("INSERT INTO users SET username=?, password=?, firstname=?, lastname=?, email=?")
-	res, _ := stmt.Exec(user.FirstName, user.Password, user.FirstName, user.LastName, user.Email)
+	res, err := stmt.Exec(user.Username, user.Password, user.FirstName, user.LastName, user.Email)
 	id, _ := res.LastInsertId()
 	defer stmt.Close()
-	return getUserByID(id)
+	return getUserByID(id), err
 }
 
 // Registration : create new user
@@ -107,35 +107,30 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := conn.Prepare("INSERT INTO users SET username=?, password=?, firstname=?, lastname=?, email=?")
+	stmt, err := createUser(user)
 	if err == nil {
-		_, err := stmt.Exec(&user.FirstName, &user.Password, &user.FirstName, &user.LastName, &user.Email)
+		token, err := helper.GetToken(user.Username, user.Password)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			var res models.StatusRes
 			res.Status = 500
-			res.Msg = "Something went wrong"
-			defer stmt.Close()
-			json.NewEncoder(w).Encode(res)
+			res.Msg = "Error generating JWT token"
 
+			json.NewEncoder(w).Encode(res)
 		} else {
 			w.WriteHeader(http.StatusOK)
-			token, err := helper.GetToken(user.Username, user.Password)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				var res models.StatusRes
-				res.Status = 500
-				res.Msg = "Error generating JWT token"
-				defer stmt.Close()
-				json.NewEncoder(w).Encode(res)
-			}
 			var res models.UserStatusResSuccss
 			res.Status = 200
 			res.Msg = "User has been created successfully"
-			res.Data = createUser(user)
+			res.Data = stmt
 			res.Data.Token = token
-			defer stmt.Close()
 			json.NewEncoder(w).Encode(res)
 		}
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		var res models.StatusRes
+		res.Status = 500
+		res.Msg = "Something wont wrong"
+		json.NewEncoder(w).Encode(res)
 	}
 }
