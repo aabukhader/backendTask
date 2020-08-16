@@ -20,7 +20,7 @@ The Structure I used is similar to MVC patters except the V part (view) and the 
 * `db`: this folder hold the connection with the database
 * `helper`: this folder hold the hlper functions such as the jwt token generator 
 
-`PS: Each folder is a package  `
+`PS: Each folder is a package`
 
 ## Future Work
 * add bcrypt to the project to encrypt the user password
